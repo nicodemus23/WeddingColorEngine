@@ -1,0 +1,10 @@
+{
+	"SourceFiles": [
+		"C:\\Users\\nleac\\OneDrive - Warner Bros. Discovery\\Documents\\Unreal Projects\\WeddingColorEngine\\Source\\WeddingColorEngine\\WeddingColorEngine.Build.cs",
+		"C:\\Users\\nleac\\OneDrive - Warner Bros. Discovery\\Documents\\Unreal Projects\\WeddingColorEngine\\Plugins\\VisualStudioTools\\Source\\VisualStudioBlueprintDebuggerHelper\\VisualStudioBlueprintDebuggerHelper.Build.cs",
+		"C:\\Users\\nleac\\OneDrive - Warner Bros. Discovery\\Documents\\Unreal Projects\\WeddingColorEngine\\Plugins\\VisualStudioTools\\Source\\VisualStudioTools\\VisualStudioTools.Build.cs",
+		"C:\\Users\\nleac\\OneDrive - Warner Bros. Discovery\\Documents\\Unreal Projects\\WeddingColorEngine\\Source\\WeddingColorEngine.Target.cs",
+		"C:\\Users\\nleac\\OneDrive - Warner Bros. Discovery\\Documents\\Unreal Projects\\WeddingColorEngine\\Source\\WeddingColorEngineEditor.Target.cs"
+	],
+	"EngineVersion": "5.7.1"
+}

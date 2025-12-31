@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "WeddingColorEngine",
+			"Path": "..\\Source\\WeddingColorEngine.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "WeddingColorEngineEditor",
+			"Path": "..\\Source\\WeddingColorEngineEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

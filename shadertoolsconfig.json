@@ -1,0 +1,11 @@
+{
+  "root": true,
+  "hlsl.additionalIncludeDirectories": [
+    "C:/Program Files/Epic Games/UE_5.7/Engine/Shaders",
+    "${workspaceFolder}/Shaders"
+  ],
+  "hlsl.virtualDirectoryMappings": {
+    "/Engine": "C:/Program Files/Epic Games/UE_5.7/Engine/Shaders",
+    "/Project": "${workspaceFolder}/Shaders"
+  }
+}
