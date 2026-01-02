@@ -67,7 +67,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{013EAB49-2905-399A-81B8-70D2F8071029}</ProjectGuid>
+    <ProjectGuid>{7E523A83-D03C-3AF0-8080-BB2842113571}</ProjectGuid>
     <RootNamespace>WeddingColorEngine</RootNamespace>
   </PropertyGroup>
   <Import Project="UECommon.props" />
@@ -534,6 +534,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\.editorconfig"/>
+    <None Include="..\..\.gitattributes"/>
+    <None Include="..\..\.gitignore"/>
     <None Include="..\..\.vsconfig"/>
     <None Include="..\..\Config\DefaultEditor.ini"/>
     <None Include="..\..\Config\DefaultEngine.ini"/>
@@ -598,6 +600,7 @@
     <ClInclude Include="..\..\Plugins\VisualStudioTools\Source\VisualStudioTools\Public\VisualStudioTools.h"/>
     <None Include="..\..\Plugins\VisualStudioTools\Source\VisualStudioTools\VisualStudioTools.Build.cs"/>
     <None Include="..\..\Plugins\VisualStudioTools\VisualStudioTools.uplugin"/>
+    <None Include="..\..\Shaders\OkLabColorMath.ush"/>
     <None Include="..\..\shadertoolsconfig.json"/>
     <None Include="..\..\shadertoolsconfig.json.txt"/>
     <None Include="..\..\shadertoolsconfig.txt"/>

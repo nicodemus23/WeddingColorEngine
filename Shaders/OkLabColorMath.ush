@@ -16,3 +16,26 @@ static const float3x3 LMS_TO_LAB = float3x3(
     1.9779984951, -2.4285922050,  0.4505937099,
     0.0259040371,  0.7827717662, -0.8086757660
 );
+
+// Conversion 
+float3 LinearToOklab(float3 RGB)
+{
+    float3 LMS = mul((RGB_TO_LMS, RGB);
+    LMS = pow(max(LMS, 0.0), 1.0/3.0); // perceptual compression - cones
+    return mul(LMS_TO_LAB, LMS);
+}
+
+
+/** * Calculate Delta-E (Perceptual Distance)
+ * Returns a value where:
+ * < 0.02 : Indistinguishable to the eye
+ * ~ 0.10 : Clearly different colors
+ * > 0.20 : High contrast
+ */
+float GetDeltaE(float3 ColorA, float3 ColorB) {
+    float3 labA = LinearToOklab(ColorA);
+    float3 labB = LinearToOklab(ColorB);
+    return distance(labA, labB);
+}
+
+#endif
