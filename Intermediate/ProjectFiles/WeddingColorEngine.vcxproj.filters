@@ -123,8 +123,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\..\shadertoolsconfig.json" />
-    <None Include="..\..\shadertoolsconfig.json.txt" />
-    <None Include="..\..\shadertoolsconfig.txt" />
     <Filter Include="Source">
       <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
     </Filter>
@@ -143,10 +141,16 @@
     <ClCompile Include="..\..\Source\WeddingColorEngine\Private\ColorMath.cpp">
       <Filter>Source\WeddingColorEngine\Private</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\WeddingColorEngine\Private\ColorPaletteTypes.cpp">
+      <Filter>Source\WeddingColorEngine\Private</Filter>
+    </ClCompile>
     <Filter Include="Source\WeddingColorEngine\Public">
       <UniqueIdentifier>{E944E0B2-6803-362C-8FF2-814B93BD3401}</UniqueIdentifier>
     </Filter>
     <ClInclude Include="..\..\Source\WeddingColorEngine\Public\ColorMath.h">
+      <Filter>Source\WeddingColorEngine\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\WeddingColorEngine\Public\ColorPaletteTypes.h">
       <Filter>Source\WeddingColorEngine\Public</Filter>
     </ClInclude>
     <None Include="..\..\Source\WeddingColorEngine\WeddingColorEngine.Build.cs">
@@ -158,6 +162,7 @@
     <ClInclude Include="..\..\Source\WeddingColorEngine\WeddingColorEngine.h">
       <Filter>Source\WeddingColorEngine</Filter>
     </ClInclude>
+    <None Include="..\..\UpgradeLog.htm" />
     <None Include="..\..\WeddingColorEngine.uproject" />
   </ItemGroup>
 </Project>

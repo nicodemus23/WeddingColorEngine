@@ -1,9 +1,12 @@
 // OkLabColorMath.ush
 
 #ifndef OKLAB_COLORMATH_INCLUDED
-#if OKLAB_COLORMATH_INCLUDED 
+#define OKLAB_COLORMATH_INCLUDED 
+
+// Linear sRGB <-> OkLab (Björn Ottosson reference constants)
 
 // Matrix: Linear sRGB -> LMS (Long, Medium, Short cone response)
+
 static const float3x3 RGB_TO_LMS = float3x3(
     0.4122214708, 0.5363325363, 0.0514459929,
     0.2119034982, 0.6806995451, 0.1073969566,
@@ -17,14 +20,51 @@ static const float3x3 LMS_TO_LAB = float3x3(
     0.0259040371,  0.7827717662, -0.8086757660
 );
 
+static const float3x3 LAB_TO_LMS = float3x3(
+    1.0,  0.3963377774,  0.2158037573,
+    1.0, -0.1055613458, -0.0638541728,
+    1.0, -0.0894841775, -1.2914855480
+);
+
+static const float3x3 LMS_TO_RGB = float3x3(
+     4.0767416621, -3.3077115913,  0.2309699292,
+    -1.2684380046,  2.6097574011, -0.3413193965,
+    -0.0041960863, -0.7034186147,  1.7076147010
+);
+
 // Conversion 
 float3 LinearToOklab(float3 RGB)
 {
-    float3 LMS = mul((RGB_TO_LMS, RGB);
+    float3 LMS = mul(RGB_TO_LMS, RGB);
     LMS = pow(max(LMS, 0.0), 1.0/3.0); // perceptual compression - cones
     return mul(LMS_TO_LAB, LMS);
 }
 
+float3 OklabToLinear(float3 Lab)
+{
+    float3 LMS = mul(LAB_TO_LMS, Lab);
+    LMS = LMS * LMS * LMS; // cube
+    return mul(LMS_TO_RGB, LMS);
+
+}
+
+bool InGamut(float3 RGB)
+{
+    return all(RGB >= 0.0) && all(RGB <= 1.0);
+}
+
+float3 OklabToLinear_GamutMap(float3 Lab)
+{
+    // Keep L, reduce chroma (a,b) until rgb lands in [0..1]
+    float2 ab = Lab.yz;
+    [unroll] for (int i = 0; i < 12; ++i)
+    {
+        float3 RGB = OklabToLinear(float3(Lab.x, ab.x, ab.y));
+        if (InGamut(RGB)) return RGB;
+        ab *= 0.92; // shrink chroma
+    }
+    return saturate(OklabToLinear(float3(Lab.x, ab.x, ab.y)));
+}
 
 /** * Calculate Delta-E (Perceptual Distance)
  * Returns a value where:
@@ -32,10 +72,11 @@ float3 LinearToOklab(float3 RGB)
  * ~ 0.10 : Clearly different colors
  * > 0.20 : High contrast
  */
-float GetDeltaE(float3 ColorA, float3 ColorB) {
+float GetDeltaE(float3 ColorA, float3 ColorB) 
+{
     float3 labA = LinearToOklab(ColorA);
     float3 labB = LinearToOklab(ColorB);
     return distance(labA, labB);
 }
 
-#endif
+#endif // OKLAB_COLORMATH_INCLUDED

@@ -40,6 +40,10 @@ bld/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/

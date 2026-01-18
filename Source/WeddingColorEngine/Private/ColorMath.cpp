@@ -101,7 +101,7 @@ FLinearColor UColorMath::OklabToLinear(FVector Lab)
 	// Raise the values to the power of 3 to undo the cube root :
 	/**
 	 * REVERTING NON-LINEARITY:
-	 * Raising to the power of 3 "un-does" the cube root we performed earlier.
+	 * Raising to the power of 3 "un-does" the cube root performed earlier.
 	 */
 	float l = l_ * l_ * l_;
 	float m = m_ * m_ * m_;
