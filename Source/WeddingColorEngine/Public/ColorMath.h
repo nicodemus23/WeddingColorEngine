@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "ColorPaletteTypes.h"
 #include "ColorMath.generated.h"
 
 /**
@@ -30,5 +31,12 @@ public:
 	// * Calculates perceptual distance (Delta-E) in Oklab space.
 	UFUNCTION(BlueprintPure, Category = "Wedding Color Engine|Math")
 	static float GetPerceptualDistance(const FLinearColor& ColorA, const FLinearColor& ColorB);
+
+	UFUNCTION(BlueprintCallable, Category = "Wedding Color Engine|Generator")
+	static TArray<FLinearColor> GeneratePalette(FPaletteSettings Settings, int32 Seed = 42);
+
+private:
+	// Helper to keep Chroma inside RGB gamut
+	static FLinearColor GamutMap(FVector Oklab);
 
 };

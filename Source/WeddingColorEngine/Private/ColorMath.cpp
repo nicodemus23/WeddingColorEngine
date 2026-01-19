@@ -61,7 +61,7 @@ FVector UColorMath::LinearToOklab(const FLinearColor& LinColor)
 	 * "normalize" the RGB signal into what our Long, Medium, and Short cones see.
 	 */
 
-	// Linear sRGB -> LMS (Cone Response)
+	 // Linear sRGB -> LMS (Cone Response)
 	float l = 0.4122214708f * LinColor.R + 0.5363325363f * LinColor.G + 0.0514459929f * LinColor.B;
 	float m = 0.2119034982f * LinColor.R + 0.6806995451f * LinColor.G + 0.1073969566f * LinColor.B;
 	float s = 0.0883024619f * LinColor.R + 0.2817188376f * LinColor.G + 0.6299787005f * LinColor.B;
@@ -73,8 +73,8 @@ FVector UColorMath::LinearToOklab(const FLinearColor& LinColor)
 	 * FMath::Max(val, 0.0f) prevents the math from crashing on negative light values.
 	 */
 
-	//  Non-linearity (Cube Root)
-    //  Use FMath::Max(val, 0.0f) to prevent NaNs on negative values (though rare in Linear sRGB)
+	 //  Non-linearity (Cube Root)
+	 //  Use FMath::Max(val, 0.0f) to prevent NaNs on negative values (though rare in Linear sRGB)
 	float l_ = FMath::Pow(FMath::Max(l, 0.0f), 1.0f / 3.0f);
 	float m_ = FMath::Pow(FMath::Max(m, 0.0f), 1.0f / 3.0f);
 	float s_ = FMath::Pow(FMath::Max(s, 0.0f), 1.0f / 3.0f);
@@ -86,7 +86,7 @@ FVector UColorMath::LinearToOklab(const FLinearColor& LinColor)
 	 * X = L (Brightness), Y = a (Green-to-Red contrast), Z = b (Blue-to-Yellow contrast).
 	 */
 
-	// LMS -> Oklab (Projection)
+	 // LMS -> Oklab (Projection)
 	return FVector(
 		0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
 		1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
@@ -106,7 +106,7 @@ FLinearColor UColorMath::OklabToLinear(const FVector& Lab)
 	 * Converting abstract perceptual coordinates back into raw cone intensities.
 	 */
 
-	// Oklab -> LMS
+	 // Oklab -> LMS
 	float l_ = Lab.X + 0.3963377774f * Lab.Y + 0.2158037573f * Lab.Z;
 	float m_ = Lab.X - 0.1055613458f * Lab.Y - 0.0638541728f * Lab.Z;
 	float s_ = Lab.X - 0.0894841775f * Lab.Y - 1.2914855480f * Lab.Z;
@@ -118,7 +118,7 @@ FLinearColor UColorMath::OklabToLinear(const FVector& Lab)
 	 * Raising to the power of 3 "un-does" the cube root performed earlier.
 	 */
 
-	// Revert Non-linearity (Cube)
+	 // Revert Non-linearity (Cube)
 	float l = l_ * l_ * l_;
 	float m = m_ * m_ * m_;
 	float s = s_ * s_ * s_;
@@ -130,7 +130,7 @@ FLinearColor UColorMath::OklabToLinear(const FVector& Lab)
 	 * that drive your screen or shader.
 	 */
 
-	// LMS -> Linear sRGB
+	 // LMS -> Linear sRGB
 	return FLinearColor(
 		+4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s,
 		-1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s,
@@ -150,4 +150,139 @@ float UColorMath::GetPerceptualDistance(const FLinearColor& ColorA, const FLinea
 
 	// Euclidean Distance = distance between two points in Oklab space
 	return FVector::Dist(LabA, LabB);
+}
+
+// * Generates a deterministic palette based on settings.
+// *Handles OkLCH conversion, Hue math, and Gamut Mapping internally.
+TArray<FLinearColor> UColorMath::GeneratePalette(FPaletteSettings Settings, int32 Seed)
+{
+	TArray<FLinearColor> Palette;
+	FRandomStream Stream(Seed); // deterministic RNG
+
+	float BaseHueRad = FMath::DegreesToRadians(Settings.BaseHueDeg);
+	float SpreadRad = FMath::DegreesToRadians(Settings.HueSpreadDeg);
+
+	for (int32 i = 0; i < Settings.Count; i++)
+	{
+		float H_Offset = 0.0f;
+
+		// Calculate Hue Offset based on Mode // 
+		switch (Settings.Mode)
+		{
+		case EPaletteMode::Analogous:
+			// Spread colors evenly around the base hue
+			// Map i from [0..N-1] to [-0.5..0.5] * Spread
+			if (Settings.Count > 1)
+			{
+				float Ratio = (float)i / (float)(Settings.Count - 1);
+				H_Offset = (Ratio - 0.5f) * SpreadRad;
+			}
+			break;
+		case EPaletteMode::Triadic:
+			// 3 Anchors: 0, 120, 240 degrees. Distribute points among them.
+		{
+			int32 Leg = i % 3;
+			H_Offset = FMath::DegreesToRadians(Leg * 120.0f);
+			// Add small jitter within spread
+			H_Offset += Stream.FRandRange(-0.5f, 0.5f) * SpreadRad;
+		}
+		break;
+
+		case EPaletteMode::SplitComplementary:
+			// Anchors: 0, 150, 210 (180 +/- 30). 
+		{
+			int32 Leg = i % 3;
+			if (Leg == 0) H_Offset = 0.0f; // Base
+			else if (Leg == 1) H_Offset = FMath::DegreesToRadians(150.0f);
+			else H_Offset = FMath::DegreesToRadians(210.0f);
+
+			H_Offset += Stream.FRandRange(-0.2f, 0.2f) * SpreadRad;
+		}
+		break;
+
+		case EPaletteMode::Monochrome_L:
+			// Hue stays fixed (mostly), Lightness varies heavily
+			H_Offset = Stream.FRandRange(-0.1f, 0.1f) * SpreadRad;
+			break;
+
+		case EPaletteMode::Tetradic:
+			// 0, 90, 180, 270
+		{
+			int32 Leg = i % 4;
+			H_Offset = FMath::DegreesToRadians(Leg * 90.0f);
+			H_Offset += Stream.FRandRange(-0.2f, 0.2f) * SpreadRad;
+		}
+		break;
+		}
+		// --- 2. Apply Variance to L and C ---
+		float FinalHue = BaseHueRad + H_Offset;
+
+		// Variance: Random float between -1 and 1 * VarianceAmount
+		float L_Noise = Stream.FRandRange(-1.0f, 1.0f) * Settings.LVariance;
+		float C_Noise = Stream.FRandRange(-1.0f, 1.0f) * Settings.CVariance;
+
+		// Special case for Monochrome: Spread L more
+		if (Settings.Mode == EPaletteMode::Monochrome_L)
+		{
+			L_Noise = Stream.FRandRange(-1.0f, 1.0f) * (Settings.LVariance * 4.0f);
+		}
+
+		float FinalL = FMath::Clamp(Settings.TargetL + L_Noise, 0.0f, 1.0f);
+		float FinalC = FMath::Max(Settings.TargetC + C_Noise, 0.0f);
+
+		// --- 3. Convert Polar (LCH) -> Cartesian (Lab) ---
+		// a = C * cos(h), b = C * sin(h)
+		FVector Oklab;
+		Oklab.X = FinalL;
+		Oklab.Y = FinalC * FMath::Cos(FinalHue);
+		Oklab.Z = FinalC * FMath::Sin(FinalHue);
+
+		// --- 4. Gamut Map & Convert to Linear RGB ---
+		Palette.Add(GamutMap(Oklab));
+	}
+
+	return Palette;
+
+}
+
+FLinearColor UColorMath::GamutMap(FVector Oklab)
+{
+	// Simple Chroma Reduction Strategy
+	  // 1. Try converting straight to Linear
+	FLinearColor RGB = OklabToLinear(Oklab);
+
+	// 2. Check if in gamut (0..1)
+	// Using a small epsilon for float errors
+	if (RGB.R >= -0.001f && RGB.R <= 1.001f &&
+		RGB.G >= -0.001f && RGB.G <= 1.001f &&
+		RGB.B >= -0.001f && RGB.B <= 1.001f)
+	{
+		return RGB;
+	}
+
+	// 3. If out of gamut, reduce Chroma (C) while keeping L and h fixed
+	// Binary search is better, but a simple iterative reduction is fast enough for <100 items
+	float CurrentC = FMath::Sqrt(Oklab.Y * Oklab.Y + Oklab.Z * Oklab.Z);
+	float Hue = FMath::Atan2(Oklab.Z, Oklab.Y);
+
+	// Reduce C by 5% steps until it fits
+	for (int32 Step = 0; Step < 20; Step++)
+	{
+		CurrentC *= 0.95f;
+
+		Oklab.Y = CurrentC * FMath::Cos(Hue);
+		Oklab.Z = CurrentC * FMath::Sin(Hue);
+
+		RGB = OklabToLinear(Oklab);
+
+		if (RGB.R >= 0.0f && RGB.R <= 1.0f &&
+			RGB.G >= 0.0f && RGB.G <= 1.0f &&
+			RGB.B >= 0.0f && RGB.B <= 1.0f)
+		{
+			return RGB;
+		}
+	}
+
+	// Fallback - Hard clamp (preserves L, destroys Hue/Sat, but prevents artifacts)
+	return RGB.GetClamped();
 }
